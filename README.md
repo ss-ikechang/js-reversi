@@ -1,7 +1,11 @@
 # js-reversi
 JavaScriptで製作したリバーシ
 
-## デモ
+## デモ  
+リバーシ  
+https://ss-ikechang.github.io/js-reversi/
+
+## fork元オリジナルデモ
 https://kimoty.net/reversi/
 
 ## 得られた知見
