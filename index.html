@@ -41,20 +41,12 @@
     </style>
 </head>
 <body>
-    <div id="settings">
-        <h2>リバーシ</h2><br>
-        <p>どのモードでプレイしますか？</p>
-        <label for="inputName" class="form-label">名前</label>
-        <input type="text" value="あなた" id="inputName" class="form-control"><br><br>
-        <input type="button" value="ひとりで遊ぶ（簡易CPU）" class="btn btn-outline-primary" onclick="numberOfPeople(1);"><br><br>
-        <input type="button" value="ふたりで遊ぶ" class="btn btn-outline-primary" onclick="numberOfPeople(2);">
-    </div>
     <div id="contents">
         <h1>リバーシ</h1>
         <p>プレイヤー: <span id="nowPlayer"></span></p>
-        <canvas id="canvas" width="399px" height="399px"></canvas>
+        <canvas id="canvas" class="canvas" width="399px" height="399px"></canvas>
         <br>
-        <input type="button" value="トップに戻る" class="btn btn-outline-primary" onclick="moveTop();">
+        <input type="button" value="最初から" class="btn btn-outline-primary" onclick="moveTop();">
         <span id="result"></span>          
     </div>
     <script src="./script.js"></script>

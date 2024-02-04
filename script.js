@@ -1,27 +1,12 @@
 // 設定画面の指定を反映させる関数、変数
-let playMode, yourName, partnerName;
-function numberOfPeople(number) {
-    if (number === 1) {
-        playMode = 1;
-        partnerName = '（CPU）';
-    } else if (number === 2) {
-        playMode = 2;
-        partnerName = '（相手）';
-    }
-
-    let inputName = document.getElementById('inputName').value
-    yourName = '（' + inputName + '）';
-    // #settingを削除する
-    document.getElementById('settings').remove();
-    // canvasの周りの枠を追加
-    document.getElementById("canvas").classList.add("canvas");
-    // 盤面を描写
-    draw();
-}
+let playMode = 1;
+let partnerName = '（CPU）';
+let inputName = 'あなた';
+let yourName = '（' + inputName + '）';
 
 // トップに戻るボタンを押した際、確認画面を出す
 function moveTop() {
-    let agree = confirm('本当にトップに戻りますか？（ゲームは保存されません）');
+    let agree = confirm('本当に最初に戻りますか？（ゲームは保存されません）');
     if (agree === true) {
         location.reload();
     }
@@ -102,20 +87,21 @@ function draw() {
             // 置ける場所を判定・描写
             let result = canPut(x, y);
 
+            // 石が置ける場所を・で示すロジック。表示しない。
             if (result[9] === 1) {
-                if (player === 1) { // ->'black'
-                    // 黒石表示
-                    ctx.beginPath();
-                    ctx.arc((y - 1 ) * 50 + 24.5, (x - 1) * 50 + 24.5, 5, 0 * Math.PI / 180, 360 * Math.PI / 180, false);
-                    ctx.fillStyle = 'black';
-                    ctx.fill();
-                } else { // ->'white'
-                    // 白石表示
-                    ctx.beginPath();
-                    ctx.arc((y - 1) * 50 + 24.5, (x - 1) * 50 + 24.5, 5, 0 * Math.PI / 180, 360 * Math.PI / 180, false);
-                    ctx.fillStyle = 'white';
-                    ctx.fill();
-                }
+                // if (player === 1) { // ->'black'
+                //     // 黒石表示
+                //     ctx.beginPath();
+                //     ctx.arc((y - 1 ) * 50 + 24.5, (x - 1) * 50 + 24.5, 5, 0 * Math.PI / 180, 360 * Math.PI / 180, false);
+                //     ctx.fillStyle = 'black';
+                //     ctx.fill();
+                // } else { // ->'white'
+                //     // 白石表示
+                //     ctx.beginPath();
+                //     ctx.arc((y - 1) * 50 + 24.5, (x - 1) * 50 + 24.5, 5, 0 * Math.PI / 180, 360 * Math.PI / 180, false);
+                //     ctx.fillStyle = 'white';
+                //     ctx.fill();
+                // }
             }
         }
     }
@@ -345,3 +331,10 @@ function mouseOut() {
     img.src=imageBase64;
     ctx.drawImage(img, 0, 0);
 }
+
+// 【JS】 DOMContentLoaded と load の違いを新人でもわかるように解説
+// https://takayamato.com/eventlistener/
+// 盤面を描写
+window.addEventListener('load', draw, false);
+
+
