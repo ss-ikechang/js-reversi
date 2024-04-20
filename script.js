@@ -26,7 +26,7 @@ let imageBase64;
 // CPU対戦時のパス判定に使用
 let passAuto;
 // 盤面の初期設定
-let array = [
+let boardArray = [
   [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
   [-1, 0, 0, 0, 0, 0, 0, 0, 0, -1],
   [-1, 0, 0, 0, 0, 0, 0, 0, 0, -1],
@@ -52,144 +52,174 @@ let direction = [
 ];
 /* direction = [[左上],[左],[左下],[上],[原点],[下],[右上],[右],[右下]]; */
 
-// キャンバス準備
-let canvas = document.getElementById("canvas");
-let ctx = canvas.getContext("2d");
+const globalCanvas = document.getElementById("canvas");
+// const glovalCtx = this.canvas.getContext("2d");
 
-// 盤面を描写する関数
-const draw = () => {
-  // 上部のプレイヤー名書き換え
-  if (player === 1) {
-    document.getElementById("nowPlayer").innerHTML = "黒" + yourName;
-  } else {
-    document.getElementById("nowPlayer").innerHTML = "白" + partnerName;
+// View: BoardView
+class BoardView {
+  canvas;
+  ctx;
+  nowPlayerElement;
+
+  constructor() {
+    // キャンバス準備
+    this.canvas = document.getElementById("canvas");
+    this.ctx = this.canvas.getContext("2d");
+    this.nowPlayerElement = document.getElementById("nowPlayer");
   }
 
-  // 念の為リセット
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-  // キャンバス背景を緑色に
-  ctx.fillStyle = "green";
-
-  ctx.fillRect(0, 0, GAMESIZE, GAMESIZE);
-
-  for (let x = 1; x <= 8; x++) {
-    for (let y = 1; y <= 8; y++) {
-      // 配列に従って描写する色を変更
-      let position = array[x][y];
-
-      // canvas描写用変数＆描写処理
-      let drawX = (y - 1) * CELLSIZE;
-      let drawY = (x - 1) * CELLSIZE;
-
-      if (position === 1) {
-        // 黒石表示
-        ctx.beginPath();
-
-        ctx.arc(
-          drawX + CENTER_POSTION_OF_CIRCLE,
-          drawY + CENTER_POSTION_OF_CIRCLE,
-          RADIUS,
-          (0 * Math.PI) / 180,
-          (360 * Math.PI) / 180,
-          false
-        );
-        ctx.fillStyle = "black";
-        ctx.fill();
-      } else if (position === 2) {
-        // 白石表示
-        ctx.beginPath();
-        ctx.arc(
-          drawX + CENTER_POSTION_OF_CIRCLE,
-          drawY + CENTER_POSTION_OF_CIRCLE,
-          RADIUS,
-          (0 * Math.PI) / 180,
-          (360 * Math.PI) / 180,
-          false
-        );
-        ctx.fillStyle = "white";
-        ctx.fill();
-      }
-    }
+  addMouseEvent() {
+    // 以下マウスオーバー時に色をつける処理
+    // イベントリスナの向こう側でオブジェクトのプロパティを参照するには、一度アロー関数をかませるとできるようになる。
+    this.canvas.addEventListener(
+      "mousemove",
+      (e) => this.handleMouseOver(e),
+      false
+    );
+    // マウスアウト時に付けた色を解除する処理
+    // イベントリスナの向こう側でオブジェクトのプロパティを参照するには、一度アロー関数をかませるとできるようになる。
+    this.canvas.addEventListener(
+      "mouseout",
+      (e) => this.handleMouseOut(e),
+      false
+    );
   }
 
-  // セルの線描画
-  // パスをリセット
-  ctx.beginPath();
-  // 線の色
-  ctx.strokeStyle = "black";
-  // 線の太さ
-  ctx.lineWidth = 1;
-  for (let xy = 1; xy < 8; xy++) {
-    // 線描画位置
-    let posXY = (xy - 1) * CELLSIZE + CELL_INNER_SIZE;
-    // 縦線
-    ctx.moveTo(posXY, 0);
-    ctx.lineTo(posXY, GAMESIZE);
-    // 横線
-    ctx.moveTo(0, posXY);
-    ctx.lineTo(GAMESIZE, posXY);
-  }
-  // 線を描画する
-  ctx.stroke();
+  // constructor(boardModel) {
+  //   this.boardModel = boardModel;
+  // }
 
-  imageBase64 = canvas.toDataURL("image/png");
-};
-
-// その場所が置ける場所か、またひっくり返す方向を判定する関数
-// 引数(numberX, numberY) -> (X位置(1~8), Y位置(1~8))
-const canPut = (numberX, numberY) => {
-  // 上下左右が置ける位置か判定
-  let result = [];
-  /* 
-        result(出力例) = [false,true,false,false,false,false,false,false,false]; (->この場合、左側に置ける)
-        result(方向) = [[左上],[左],[左下],[上],[原点],[下],[右上],[右],[右下]];
-    */
-  // let allOver 0ならどこも置けない、1ならどこか置ける。result[9]から取得
-  let allOver = 0;
-  for (let i = 0; i <= 8; i++) {
-    if (
-      array[numberX + direction[i][0]][numberY + direction[i][1]] ===
-        opponent &&
-      array[numberX][numberY] === 0
-    ) {
-      // 上下左右に[相手の色](白(==2))がある場合 && そこが空いている(==0)マスか
-      // 現在の8つの方向を記録
-      let c = direction[i][0];
-      let d = direction[i][1];
-      // とりあえずfalse
-      let TorF = false;
-
-      // 置いた先に自分の色があるか探索する処理
-      while (true) {
-        // もし、先に黒があり、置けるのであればtrue
-        if (array[numberX + c][numberY + d] === player) {
-          TorF = true;
-          allOver = 1;
-          break;
-        }
-        // 壁・緑に当たったら終了
-        if (
-          array[numberX + c][numberY + d] === -1 ||
-          array[numberX + c][numberY + d] === 0
-        ) {
-          break;
-        }
-        c += direction[i][0];
-        d += direction[i][1];
-      }
-      result.push(TorF);
+  // Methods to render the board
+  // 盤面を描写する関数
+  renderBoard() {
+    // 上部のプレイヤー名書き換え;
+    if (player === 1) {
+      this.nowPlayerElement.innerHTML = "黒" + yourName;
     } else {
-      result.push(false);
+      this.nowPlayerElement.innerHTML = "白" + partnerName;
     }
+
+    // 念の為リセット
+    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+    // キャンバス背景を緑色に
+    this.ctx.fillStyle = "green";
+
+    this.ctx.fillRect(0, 0, GAMESIZE, GAMESIZE);
+
+    for (let x = 1; x <= 8; x++) {
+      for (let y = 1; y <= 8; y++) {
+        // 配列に従って描写する色を変更
+        let position = boardArray[x][y];
+
+        // canvas描写用変数＆描写処理
+        let drawX = (y - 1) * CELLSIZE;
+        let drawY = (x - 1) * CELLSIZE;
+
+        if (position === 1) {
+          // 黒石表示
+          this.ctx.beginPath();
+
+          this.ctx.arc(
+            drawX + CENTER_POSTION_OF_CIRCLE,
+            drawY + CENTER_POSTION_OF_CIRCLE,
+            RADIUS,
+            (0 * Math.PI) / 180,
+            (360 * Math.PI) / 180,
+            false
+          );
+          this.ctx.fillStyle = "black";
+          this.ctx.fill();
+        } else if (position === 2) {
+          // 白石表示
+          this.ctx.beginPath();
+          this.ctx.arc(
+            drawX + CENTER_POSTION_OF_CIRCLE,
+            drawY + CENTER_POSTION_OF_CIRCLE,
+            RADIUS,
+            (0 * Math.PI) / 180,
+            (360 * Math.PI) / 180,
+            false
+          );
+          this.ctx.fillStyle = "white";
+          this.ctx.fill();
+        }
+      }
+    }
+
+    // セルの線描画
+    // パスをリセット
+    this.ctx.beginPath();
+    // 線の色
+    this.ctx.strokeStyle = "black";
+    // 線の太さ
+    this.ctx.lineWidth = 1;
+    for (let xy = 1; xy < 8; xy++) {
+      // 線描画位置
+      let posXY = (xy - 1) * CELLSIZE + CELL_INNER_SIZE;
+      // 縦線
+      this.ctx.moveTo(posXY, 0);
+      this.ctx.lineTo(posXY, GAMESIZE);
+      // 横線
+      this.ctx.moveTo(0, posXY);
+      this.ctx.lineTo(GAMESIZE, posXY);
+    }
+    // 線を描画する
+    this.ctx.stroke();
+
+    imageBase64 = this.canvas.toDataURL("image/png");
   }
-  result.push(allOver);
-  // 結果を返却
-  return result;
-};
+
+  // Methods to handle user input
+  handleUserInput(x, y) {
+    // Code for handling user input goes here
+  }
+
+  // Methods to handle user input
+  handleMouseOver(e) {
+    // this.nowPlayerElement.innerHTML = "handleMouseOver";
+
+    /* https://tech-blog.s-yoshiki.com/entry/90 (参考。先ほどと同様のものです) */
+    // クリック地点の座標を取得
+    let rect = e.target.getBoundingClientRect();
+    let x = e.clientX - rect.left;
+    let y = e.clientY - rect.top;
+    /* ここまで */
+
+    // クリックされた四角の配列上での位置を取得する（正方形の一辺は50なので、座標を50で割り、1を足す）
+    let numberX = Math.floor(y / CELLSIZE + 1);
+    let numberY = Math.floor(x / CELLSIZE + 1);
+
+    // 更新時、生成した盤面画像を読み込む
+    let img = new Image();
+    img.src = imageBase64;
+    this.ctx.drawImage(img, 0, 0);
+
+    // 色を付ける
+    this.ctx.fillStyle = "rgba(255, 255, 0, 0.5)";
+    this.ctx.fillRect(
+      (numberY - 1) * CELLSIZE,
+      (numberX - 1) * CELLSIZE,
+      CELL_INNER_SIZE,
+      CELL_INNER_SIZE
+    );
+  }
+
+  handleMouseOut() {
+    // this.nowPlayerElement.innerHTML = "handleMouseOut";
+    // 更新時、生成した盤面画像を読み込む
+    let img = new Image();
+    img.src = imageBase64;
+    this.ctx.drawImage(img, 0, 0);
+  }
+}
+
+// 盤面VIEW生成
+const boardView = new BoardView();
+boardView.addMouseEvent();
 
 // クリック取得
-canvas.addEventListener(
+globalCanvas.addEventListener(
   "click",
   (event) => {
     /* https://tech-blog.s-yoshiki.com/entry/90 (参考) */
@@ -214,6 +244,58 @@ canvas.addEventListener(
   false
 );
 
+// その場所が置ける場所か、またひっくり返す方向を判定する関数
+// 引数(numberX, numberY) -> (X位置(1~8), Y位置(1~8))
+const canPut = (numberX, numberY) => {
+  // 上下左右が置ける位置か判定
+  let result = [];
+  /* 
+        result(出力例) = [false,true,false,false,false,false,false,false,false]; (->この場合、左側に置ける)
+        result(方向) = [[左上],[左],[左下],[上],[原点],[下],[右上],[右],[右下]];
+    */
+  // let allOver 0ならどこも置けない、1ならどこか置ける。result[9]から取得
+  let allOver = 0;
+  for (let i = 0; i <= 8; i++) {
+    if (
+      boardArray[numberX + direction[i][0]][numberY + direction[i][1]] ===
+        opponent &&
+      boardArray[numberX][numberY] === 0
+    ) {
+      // 上下左右に[相手の色](白(==2))がある場合 && そこが空いている(==0)マスか
+      // 現在の8つの方向を記録
+      let c = direction[i][0];
+      let d = direction[i][1];
+      // とりあえずfalse
+      let TorF = false;
+
+      // 置いた先に自分の色があるか探索する処理
+      while (true) {
+        // もし、先に黒があり、置けるのであればtrue
+        if (boardArray[numberX + c][numberY + d] === player) {
+          TorF = true;
+          allOver = 1;
+          break;
+        }
+        // 壁・緑に当たったら終了
+        if (
+          boardArray[numberX + c][numberY + d] === -1 ||
+          boardArray[numberX + c][numberY + d] === 0
+        ) {
+          break;
+        }
+        c += direction[i][0];
+        d += direction[i][1];
+      }
+      result.push(TorF);
+    } else {
+      result.push(false);
+    }
+  }
+  result.push(allOver);
+  // 結果を返却
+  return result;
+};
+
 // 対戦CPUの関数（ランダムで置いているだけなのでとても弱い）
 const opponentAuto = () => {
   while (true) {
@@ -237,10 +319,10 @@ const reverse = (numberX, numberY) => {
       let c = direction[i][0];
       let d = direction[i][1];
       while (true) {
-        array[numberX + c][numberY + d] = player;
+        boardArray[numberX + c][numberY + d] = player;
         // 一個先に黒があったらbreak
         if (
-          array[numberX + direction[i][0] + c][
+          boardArray[numberX + direction[i][0] + c][
             numberY + direction[i][1] + d
           ] === player
         ) {
@@ -253,7 +335,7 @@ const reverse = (numberX, numberY) => {
   }
   if (result[9] === 1) {
     // 自分のクリックしたところも反転
-    array[numberX][numberY] = player;
+    boardArray[numberX][numberY] = player;
 
     // プレイヤーの反転
     if (player === 1) {
@@ -263,7 +345,7 @@ const reverse = (numberX, numberY) => {
       player = 1; // ->'black'
       opponent = 2; // ->'white'
     }
-    draw();
+    boardView.renderBoard();
     judgePass();
   }
 };
@@ -314,7 +396,7 @@ const judgePass = () => {
         alert("黒はパスされました。");
       }
       passAuto = true;
-      draw();
+      boardView.renderBoard();
     } else {
       passAuto = true;
       document.getElementById("result").innerHTML =
@@ -330,9 +412,9 @@ const result = () => {
   let white = 0;
   for (let i = 0; i < 10; i++) {
     for (let j = 0; j < 10; j++) {
-      if (array[i][j] === 1) {
+      if (boardArray[i][j] === 1) {
         black++;
-      } else if (array[i][j] === 2) {
+      } else if (boardArray[i][j] === 2) {
         white++;
       }
     }
@@ -346,51 +428,10 @@ const result = () => {
   }
 };
 
-// 以下マウスオーバー時に色をつける処理
-canvas.addEventListener(
-  "mousemove",
-  (e) => {
-    /* https://tech-blog.s-yoshiki.com/entry/90 (参考。先ほどと同様のものです) */
-    // クリック地点の座標を取得
-    let rect = e.target.getBoundingClientRect();
-    let x = e.clientX - rect.left;
-    let y = e.clientY - rect.top;
-    /* ここまで */
-
-    // クリックされた四角の配列上での位置を取得する（正方形の一辺は50なので、座標を50で割り、1を足す）
-    let numberX = Math.floor(y / CELLSIZE + 1);
-    let numberY = Math.floor(x / CELLSIZE + 1);
-
-    // 更新時、生成した盤面画像を読み込む
-    let img = new Image();
-    img.src = imageBase64;
-    ctx.drawImage(img, 0, 0);
-
-    // 色を付ける
-    ctx.fillStyle = "rgba(255, 255, 0, 0.5)";
-    ctx.fillRect(
-      (numberY - 1) * CELLSIZE,
-      (numberX - 1) * CELLSIZE,
-      CELL_INNER_SIZE,
-      CELL_INNER_SIZE
-    );
-  },
-  false
-);
-
-// マウスアウト時に付けた色を解除する処理
-canvas.addEventListener(
-  "mouseout",
-  () => {
-    // 更新時、生成した盤面画像を読み込む
-    let img = new Image();
-    img.src = imageBase64;
-    ctx.drawImage(img, 0, 0);
-  },
-  false
-);
-
 // 【JS】 DOMContentLoaded と load の違いを新人でもわかるように解説
 // https://takayamato.com/eventlistener/
+
 // 盤面を描写
-window.addEventListener("load", draw, false);
+// window.addEventListener("load", boardView.renderBoard, false);
+// イベントリスナの向こう側でオブジェクトのプロパティを参照するには、一度アロー関数をかませるとできるようになる。
+window.addEventListener("load", (e) => boardView.renderBoard(e), false);
