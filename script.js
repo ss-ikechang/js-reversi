@@ -1,3 +1,9 @@
+const GAMESIZE = 400;
+const CELLSIZE = GAMESIZE / 8;
+const CELL_INNER_SIZE = CELLSIZE * 0.98;
+const CENTER_POSTION_OF_CIRCLE = CELL_INNER_SIZE / 2;
+const RADIUS = CELLSIZE * 0.44;
+
 // 設定画面の指定を反映させる関数、変数
 let playMode = 1;
 let partnerName = "（CPU）";
@@ -51,7 +57,7 @@ let canvas = document.getElementById("canvas");
 let ctx = canvas.getContext("2d");
 
 // 盤面を描写する関数
-function draw() {
+const draw = () => {
   // 上部のプレイヤー名書き換え
   if (player === 1) {
     document.getElementById("nowPlayer").innerHTML = "黒" + yourName;
@@ -64,7 +70,8 @@ function draw() {
 
   // キャンバス背景を白色に
   ctx.fillStyle = "white";
-  ctx.fillRect(0, 0, 400, 400);
+
+  ctx.fillRect(0, 0, GAMESIZE, GAMESIZE);
 
   for (let x = 1; x <= 8; x++) {
     for (let y = 1; y <= 8; y++) {
@@ -72,20 +79,21 @@ function draw() {
       let position = array[x][y];
 
       // canvas描写用変数＆描写処理
-      let drawX = (y - 1) * 50;
-      let drawY = (x - 1) * 50;
+      let drawX = (y - 1) * CELLSIZE;
+      let drawY = (x - 1) * CELLSIZE;
 
       // まず、全面を緑に塗る
       ctx.fillStyle = "green";
-      ctx.fillRect(drawX, drawY, 49, 49);
+      ctx.fillRect(drawX, drawY, CELL_INNER_SIZE, CELL_INNER_SIZE);
 
       if (position === 1) {
         // 黒石表示
         ctx.beginPath();
+
         ctx.arc(
-          drawX + 24.5,
-          drawY + 24.5,
-          22,
+          drawX + CENTER_POSTION_OF_CIRCLE,
+          drawY + CENTER_POSTION_OF_CIRCLE,
+          RADIUS,
           (0 * Math.PI) / 180,
           (360 * Math.PI) / 180,
           false
@@ -96,9 +104,9 @@ function draw() {
         // 白石表示
         ctx.beginPath();
         ctx.arc(
-          drawX + 24.5,
-          drawY + 24.5,
-          22,
+          drawX + CENTER_POSTION_OF_CIRCLE,
+          drawY + CENTER_POSTION_OF_CIRCLE,
+          RADIUS,
           (0 * Math.PI) / 180,
           (360 * Math.PI) / 180,
           false
@@ -106,34 +114,14 @@ function draw() {
         ctx.fillStyle = "white";
         ctx.fill();
       }
-
-      // 置ける場所を判定・描写
-      let result = canPut(x, y);
-
-      // 石が置ける場所を・で示すロジック。表示しない。
-      if (result[9] === 1) {
-        // if (player === 1) { // ->'black'
-        //     // 黒石表示
-        //     ctx.beginPath();
-        //     ctx.arc((y - 1 ) * 50 + 24.5, (x - 1) * 50 + 24.5, 5, 0 * Math.PI / 180, 360 * Math.PI / 180, false);
-        //     ctx.fillStyle = 'black';
-        //     ctx.fill();
-        // } else { // ->'white'
-        //     // 白石表示
-        //     ctx.beginPath();
-        //     ctx.arc((y - 1) * 50 + 24.5, (x - 1) * 50 + 24.5, 5, 0 * Math.PI / 180, 360 * Math.PI / 180, false);
-        //     ctx.fillStyle = 'white';
-        //     ctx.fill();
-        // }
-      }
     }
   }
   imageBase64 = canvas.toDataURL("image/png");
-}
+};
 
 // その場所が置ける場所か、またひっくり返す方向を判定する関数
 // 引数(numberX, numberY) -> (X位置(1~8), Y位置(1~8))
-function canPut(numberX, numberY) {
+const canPut = (numberX, numberY) => {
   // 上下左右が置ける位置か判定
   let result = [];
   /* 
@@ -181,33 +169,36 @@ function canPut(numberX, numberY) {
   result.push(allOver);
   // 結果を返却
   return result;
-}
+};
 
 // クリック取得
-canvas.addEventListener("click", mouseDown, false);
-function mouseDown(event) {
-  /* https://tech-blog.s-yoshiki.com/entry/90 (参考) */
-  // クリック地点の座標を取得
-  let rect = event.target.getBoundingClientRect();
-  let x = event.clientX - rect.left;
-  let y = event.clientY - rect.top;
-  /* ここまで */
+canvas.addEventListener(
+  "click",
+  (event) => {
+    /* https://tech-blog.s-yoshiki.com/entry/90 (参考) */
+    // クリック地点の座標を取得
+    let rect = event.target.getBoundingClientRect();
+    let x = event.clientX - rect.left;
+    let y = event.clientY - rect.top;
+    /* ここまで */
 
-  // クリックされた四角の配列上での位置を取得する（正方形の一辺は50なので、座標を50で割り、1を足す）
-  let numberX = Math.floor(y / 50 + 1);
-  let numberY = Math.floor(x / 50 + 1);
+    // クリックされた四角の配列上での位置を取得する（正方形の一辺は50なので、座標を50で割り、1を足す）
+    let numberX = Math.floor(y / CELLSIZE + 1);
+    let numberY = Math.floor(x / CELLSIZE + 1);
 
-  let result = canPut(numberX, numberY);
-  if (result[9] === 1) {
-    reverse(numberX, numberY);
-    if (playMode === 1 && passAuto == false) {
-      setTimeout(opponentAuto, 300);
+    let result = canPut(numberX, numberY);
+    if (result[9] === 1) {
+      reverse(numberX, numberY);
+      if (playMode === 1 && passAuto == false) {
+        setTimeout(opponentAuto, 300);
+      }
     }
-  }
-}
+  },
+  false
+);
 
 // 対戦CPUの関数（ランダムで置いているだけなのでとても弱い）
-function opponentAuto() {
+const opponentAuto = () => {
   while (true) {
     let a = Math.floor(Math.random() * (8 + 1 - 1)) + 1;
     let b = Math.floor(Math.random() * (8 + 1 - 1)) + 1;
@@ -217,10 +208,10 @@ function opponentAuto() {
       break;
     }
   }
-}
+};
 
 // ひっくり返す処理
-function reverse(numberX, numberY) {
+const reverse = (numberX, numberY) => {
   // 判定プログラムから結果呼び出し
   let result = canPut(numberX, numberY);
 
@@ -258,10 +249,10 @@ function reverse(numberX, numberY) {
     draw();
     judgePass();
   }
-}
+};
 
 // 全体に置ける場所があるか判定する関数
-function canPutAll() {
+const canPutAll = () => {
   let count = false;
   for (let x = 1; x <= 8; x++) {
     for (let y = 1; y <= 8; y++) {
@@ -282,10 +273,10 @@ function canPutAll() {
   }
   // countがtrueなら置ける石がある
   return count;
-}
+};
 
 // パス・終了判定
-function judgePass() {
+const judgePass = () => {
   passAuto = false;
   if (canPutAll() == false) {
     // 置ける場所がない
@@ -314,10 +305,10 @@ function judgePass() {
       result();
     }
   }
-}
+};
 
 // 結果を表示
-function result() {
+const result = () => {
   let black = 0;
   let white = 0;
   for (let i = 0; i < 10; i++) {
@@ -336,39 +327,51 @@ function result() {
   } else {
     alert("白:" + white + ", 黒:" + black + ", 引き分け");
   }
-}
+};
 
 // 以下マウスオーバー時に色をつける処理
-canvas.addEventListener("mousemove", mouseOver, false);
-function mouseOver(e) {
-  /* https://tech-blog.s-yoshiki.com/entry/90 (参考。先ほどと同様のものです) */
-  // クリック地点の座標を取得
-  let rect = e.target.getBoundingClientRect();
-  let x = e.clientX - rect.left;
-  let y = e.clientY - rect.top;
-  /* ここまで */
+canvas.addEventListener(
+  "mousemove",
+  (e) => {
+    /* https://tech-blog.s-yoshiki.com/entry/90 (参考。先ほどと同様のものです) */
+    // クリック地点の座標を取得
+    let rect = e.target.getBoundingClientRect();
+    let x = e.clientX - rect.left;
+    let y = e.clientY - rect.top;
+    /* ここまで */
 
-  // クリックされた四角の配列上での位置を取得する（正方形の一辺は50なので、座標を50で割り、1を足す）
-  let numberX = Math.floor(y / 50 + 1);
-  let numberY = Math.floor(x / 50 + 1);
+    // クリックされた四角の配列上での位置を取得する（正方形の一辺は50なので、座標を50で割り、1を足す）
+    let numberX = Math.floor(y / CELLSIZE + 1);
+    let numberY = Math.floor(x / CELLSIZE + 1);
 
-  // 更新時、生成した盤面画像を読み込む
-  let img = new Image();
-  img.src = imageBase64;
-  ctx.drawImage(img, 0, 0);
+    // 更新時、生成した盤面画像を読み込む
+    let img = new Image();
+    img.src = imageBase64;
+    ctx.drawImage(img, 0, 0);
 
-  // 色を付ける
-  ctx.fillStyle = "rgba(255, 255, 0, 0.5)";
-  ctx.fillRect((numberY - 1) * 50, (numberX - 1) * 50, 49, 49);
-}
+    // 色を付ける
+    ctx.fillStyle = "rgba(255, 255, 0, 0.5)";
+    ctx.fillRect(
+      (numberY - 1) * CELLSIZE,
+      (numberX - 1) * CELLSIZE,
+      CELL_INNER_SIZE,
+      CELL_INNER_SIZE
+    );
+  },
+  false
+);
+
 // マウスアウト時に付けた色を解除する処理
-canvas.addEventListener("mouseout", mouseOut, false);
-function mouseOut() {
-  // 更新時、生成した盤面画像を読み込む
-  let img = new Image();
-  img.src = imageBase64;
-  ctx.drawImage(img, 0, 0);
-}
+canvas.addEventListener(
+  "mouseout",
+  () => {
+    // 更新時、生成した盤面画像を読み込む
+    let img = new Image();
+    img.src = imageBase64;
+    ctx.drawImage(img, 0, 0);
+  },
+  false
+);
 
 // 【JS】 DOMContentLoaded と load の違いを新人でもわかるように解説
 // https://takayamato.com/eventlistener/
