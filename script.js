@@ -1,4 +1,4 @@
-const GAMESIZE = 400;
+const GAMESIZE = 300;
 const CELLSIZE = GAMESIZE / 8;
 const CELL_INNER_SIZE = CELLSIZE * 0.98;
 const CENTER_POSTION_OF_CIRCLE = CELL_INNER_SIZE / 2;
@@ -68,8 +68,8 @@ const draw = () => {
   // 念の為リセット
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  // キャンバス背景を白色に
-  ctx.fillStyle = "white";
+  // キャンバス背景を緑色に
+  ctx.fillStyle = "green";
 
   ctx.fillRect(0, 0, GAMESIZE, GAMESIZE);
 
@@ -81,10 +81,6 @@ const draw = () => {
       // canvas描写用変数＆描写処理
       let drawX = (y - 1) * CELLSIZE;
       let drawY = (x - 1) * CELLSIZE;
-
-      // まず、全面を緑に塗る
-      ctx.fillStyle = "green";
-      ctx.fillRect(drawX, drawY, CELL_INNER_SIZE, CELL_INNER_SIZE);
 
       if (position === 1) {
         // 黒石表示
@@ -116,6 +112,27 @@ const draw = () => {
       }
     }
   }
+
+  // セルの線描画
+  // パスをリセット
+  ctx.beginPath();
+  // 線の色
+  ctx.strokeStyle = "black";
+  // 線の太さ
+  ctx.lineWidth = 1;
+  for (let xy = 1; xy < 8; xy++) {
+    // 線描画位置
+    let posXY = (xy - 1) * CELLSIZE + CELL_INNER_SIZE;
+    // 縦線
+    ctx.moveTo(posXY, 0);
+    ctx.lineTo(posXY, GAMESIZE);
+    // 横線
+    ctx.moveTo(0, posXY);
+    ctx.lineTo(GAMESIZE, posXY);
+  }
+  // 線を描画する
+  ctx.stroke();
+
   imageBase64 = canvas.toDataURL("image/png");
 };
 
