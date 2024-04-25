@@ -175,20 +175,12 @@ class Controller {
     // 盤の操作（modelに対し操作する）
     let result = this.model.canPut(numberX, numberY);
     if (result[9] === 1) {
+      // 石を反転する
       this.model.reverse(numberX, numberY);
-
       // プレイヤーの反転
-      if (player === 1) {
-        player = 2; // ->'white'
-        opponent = 1; // ->'black'
-      } else {
-        player = 1; // ->'black'
-        opponent = 2; // ->'white'
-      }
-
+      this.switchPlayer();
       // 再描画（viewに対し操作する）
       this.renderBoard();
-
       // パス・終了判定
       this.judgePass();
 
@@ -206,30 +198,37 @@ class Controller {
 
   startGame() {
     // Code for starting the game goes here
+    // 【JS】 DOMContentLoaded と load の違いを新人でもわかるように解説
+    // https://takayamato.com/eventlistener/
+
+    // 盤面を描写
+    // window.addEventListener("load", controller.renderBoard, false);
+    // イベントリスナの向こう側でオブジェクトのプロパティを参照するには、一度アロー関数をかませるとできるようになる。
+    window.addEventListener("load", (e) => controller.renderBoard(e), false);
   }
 
   switchPlayer() {
     // プレイヤーの交代処理を実装
+    // プレイヤーの反転
+    if (player === 1) {
+      player = 2; // ->'white'
+      opponent = 1; // ->'black'
+    } else {
+      player = 1; // ->'black'
+      opponent = 2; // ->'white'
+    }
   }
 
   // checkForWinner() {
   //   // 勝者のチェックを行う処理を実装
   // }
-
   // パス・終了判定
   judgePass() {
     passAuto = false;
     if (this.model.canPutAll() == false) {
       // 置ける場所がない
-      if (player === 1) {
-        // プレイヤーの反転
-        player = 2; // ->'white'
-        opponent = 1; // ->'black'
-      } else {
-        // プレイヤーの反転
-        player = 1; // ->'black'
-        opponent = 2; // ->'white'
-      }
+      // プレイヤーの反転
+      this.switchPlayer();
       if (this.model.canPutAll() == true) {
         // 置ける石がある
         if (player === 1) {
@@ -241,8 +240,10 @@ class Controller {
         this.renderBoard();
       } else {
         passAuto = true;
-        this.view.createResultButton(result);
-        result();
+        this.view.createResultButton(() =>
+          this.view.result(this.model.board())
+        );
+        this.view.result(this.model.board());
       }
     }
   }
@@ -250,21 +251,20 @@ class Controller {
   // 対戦CPUの関数（ランダムで置いているだけなのでとても弱い）
   opponentAuto() {
     while (true) {
+      // ランダムにセルを選択
       let a = Math.floor(Math.random() * (8 + 1 - 1)) + 1;
       let b = Math.floor(Math.random() * (8 + 1 - 1)) + 1;
+
+      // 盤の操作（modelに対し操作する）
       let result = this.model.canPut(a, b);
       if (result[9] === 1) {
+        // 石を反転する
         this.model.reverse(a, b);
-
         // プレイヤーの反転
-        if (player === 1) {
-          player = 2; // ->'white'
-          opponent = 1; // ->'black'
-        } else {
-          player = 1; // ->'black'
-          opponent = 2; // ->'white'
-        }
+        this.switchPlayer();
+        // 再描画（viewに対し操作する）
         this.renderBoard();
+        // パス・終了判定
         this.judgePass();
 
         break;
@@ -277,33 +277,4 @@ class Controller {
 // 盤面MODEL生成
 const boardModel = new BoardModel();
 const controller = new Controller(boardModel);
-
-// 結果を表示
-const result = () => {
-  let black = 0;
-  let white = 0;
-  for (let i = 0; i < 10; i++) {
-    for (let j = 0; j < 10; j++) {
-      if (boardArray[i][j] === 1) {
-        black++;
-      } else if (boardArray[i][j] === 2) {
-        white++;
-      }
-    }
-  }
-  if (black > white) {
-    alert("白:" + white + ", 黒:" + black + ", 黒" + yourName + "の勝ち");
-  } else if (black < white) {
-    alert("白:" + white + ", 黒:" + black + ", 白" + partnerName + "の勝ち");
-  } else {
-    alert("白:" + white + ", 黒:" + black + ", 引き分け");
-  }
-};
-
-// 【JS】 DOMContentLoaded と load の違いを新人でもわかるように解説
-// https://takayamato.com/eventlistener/
-
-// 盤面を描写
-// window.addEventListener("load", controller.renderBoard, false);
-// イベントリスナの向こう側でオブジェクトのプロパティを参照するには、一度アロー関数をかませるとできるようになる。
-window.addEventListener("load", (e) => controller.renderBoard(e), false);
+controller.startGame();
