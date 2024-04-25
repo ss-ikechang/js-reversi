@@ -205,4 +205,30 @@ export class BoardView {
       .getElementById("result")
       .addEventListener("click", resultFunction, false);
   }
+
+  // 結果をメッセージダイアログ出力
+  result(boardArray) {
+    let black = 0;
+    let white = 0;
+    for (let i = 0; i < 10; i++) {
+      for (let j = 0; j < 10; j++) {
+        if (boardArray[i][j] === 1) {
+          black++;
+        } else if (boardArray[i][j] === 2) {
+          white++;
+        }
+      }
+    }
+    if (black > white) {
+      this.messageDialog(
+        "白:" + white + ", 黒:" + black + ", 黒" + yourName + "の勝ち"
+      );
+    } else if (black < white) {
+      this.messageDialog(
+        "白:" + white + ", 黒:" + black + ", 白" + partnerName + "の勝ち"
+      );
+    } else {
+      this.messageDialog("白:" + white + ", 黒:" + black + ", 引き分け");
+    }
+  }
 }
