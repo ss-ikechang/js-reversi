@@ -108,6 +108,30 @@ class BoardModel {
     return result;
   }
 
+  // 全体に置ける場所があるか判定する関数
+  canPutAll() {
+    let count = false;
+    for (let x = 1; x <= 8; x++) {
+      for (let y = 1; y <= 8; y++) {
+        // 置ける場所を判定
+        let result = this.canPut(x, y);
+
+        if (result[9] === 1) {
+          // 置ける石がある
+          count = true;
+          // 一箇所でも置けるならそれ以上調べる必要ないのでbreak
+          break;
+        }
+      }
+      if (count == true) {
+        // 一箇所でも置けるならそれ以上調べる必要ないので外側のfor文でもbreak
+        break;
+      }
+    }
+    // countがtrueなら置ける石がある
+    return count;
+  }
+
   // ひっくり返す処理
   reverse(numberX, numberY) {
     // 判定プログラムから結果呼び出し
@@ -206,34 +230,10 @@ class Controller {
 const boardModel = new BoardModel();
 const controller = new Controller(boardModel);
 
-// 全体に置ける場所があるか判定する関数
-const canPutAll = () => {
-  let count = false;
-  for (let x = 1; x <= 8; x++) {
-    for (let y = 1; y <= 8; y++) {
-      // 置ける場所を判定
-      let result = boardModel.canPut(x, y);
-
-      if (result[9] === 1) {
-        // 置ける石がある
-        count = true;
-        // 一箇所でも置けるならそれ以上調べる必要ないのでbreak
-        break;
-      }
-    }
-    if (count == true) {
-      // 一箇所でも置けるならそれ以上調べる必要ないので外側のfor文でもbreak
-      break;
-    }
-  }
-  // countがtrueなら置ける石がある
-  return count;
-};
-
 // パス・終了判定
 const judgePass = () => {
   passAuto = false;
-  if (canPutAll() == false) {
+  if (boardModel.canPutAll() == false) {
     // 置ける場所がない
     if (player === 1) {
       // プレイヤーの反転
@@ -244,7 +244,7 @@ const judgePass = () => {
       player = 1; // ->'black'
       opponent = 2; // ->'white'
     }
-    if (canPutAll() == true) {
+    if (boardModel.canPutAll() == true) {
       // 置ける石がある
       if (player === 1) {
         alert("白はパスされました。");
