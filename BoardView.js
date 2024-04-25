@@ -191,4 +191,18 @@ export class BoardView {
     img.src = imageBase64;
     this.ctx.drawImage(img, 0, 0);
   }
+
+  // メッセージダイアログ出力
+  messageDialog(message = "") {
+    window.alert(message);
+  }
+
+  // 結果を表示ボタン作成
+  createResultButton(resultFunction) {
+    document.getElementById("result").innerHTML =
+      '<input type="button" id="result-button" value="結果を表示">';
+    document
+      .getElementById("result")
+      .addEventListener("click", resultFunction, false);
+  }
 }

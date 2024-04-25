@@ -172,10 +172,10 @@ class Controller {
 
   // 盤のセル位置を受け取り、必要な操作を行う
   handleInput(numberX, numberY) {
-    // ユーザーの入力を処理し、必要な操作を行う処理を実装
-    let result = boardModel.canPut(numberX, numberY);
+    // 盤の操作（modelに対し操作する）
+    let result = this.model.canPut(numberX, numberY);
     if (result[9] === 1) {
-      boardModel.reverse(numberX, numberY);
+      this.model.reverse(numberX, numberY);
 
       // プレイヤーの反転
       if (player === 1) {
@@ -189,8 +189,8 @@ class Controller {
       // 再描画（viewに対し操作する）
       this.renderBoard();
 
-      //
-      judgePass();
+      // パス・終了判定
+      this.judgePass();
 
       if (playMode === 1 && passAuto == false) {
         // イベントリスナの向こう側でオブジェクトのプロパティを参照するには、一度アロー関数をかませるとできるようになる。
@@ -212,8 +212,39 @@ class Controller {
     // プレイヤーの交代処理を実装
   }
 
-  checkForWinner() {
-    // 勝者のチェックを行う処理を実装
+  // checkForWinner() {
+  //   // 勝者のチェックを行う処理を実装
+  // }
+
+  // パス・終了判定
+  judgePass() {
+    passAuto = false;
+    if (this.model.canPutAll() == false) {
+      // 置ける場所がない
+      if (player === 1) {
+        // プレイヤーの反転
+        player = 2; // ->'white'
+        opponent = 1; // ->'black'
+      } else {
+        // プレイヤーの反転
+        player = 1; // ->'black'
+        opponent = 2; // ->'white'
+      }
+      if (this.model.canPutAll() == true) {
+        // 置ける石がある
+        if (player === 1) {
+          this.view.messageDialog("白はパスされました。");
+        } else {
+          this.view.messageDialog("黒はパスされました。");
+        }
+        passAuto = true;
+        this.renderBoard();
+      } else {
+        passAuto = true;
+        this.view.createResultButton(result);
+        result();
+      }
+    }
   }
 
   // 対戦CPUの関数（ランダムで置いているだけなのでとても弱い）
@@ -221,9 +252,9 @@ class Controller {
     while (true) {
       let a = Math.floor(Math.random() * (8 + 1 - 1)) + 1;
       let b = Math.floor(Math.random() * (8 + 1 - 1)) + 1;
-      let result = boardModel.canPut(a, b);
+      let result = this.model.canPut(a, b);
       if (result[9] === 1) {
-        boardModel.reverse(a, b);
+        this.model.reverse(a, b);
 
         // プレイヤーの反転
         if (player === 1) {
@@ -234,7 +265,7 @@ class Controller {
           opponent = 2; // ->'white'
         }
         this.renderBoard();
-        judgePass();
+        this.judgePass();
 
         break;
       }
@@ -246,41 +277,6 @@ class Controller {
 // 盤面MODEL生成
 const boardModel = new BoardModel();
 const controller = new Controller(boardModel);
-
-// パス・終了判定
-const judgePass = () => {
-  passAuto = false;
-  if (boardModel.canPutAll() == false) {
-    // 置ける場所がない
-    if (player === 1) {
-      // プレイヤーの反転
-      player = 2; // ->'white'
-      opponent = 1; // ->'black'
-    } else {
-      // プレイヤーの反転
-      player = 1; // ->'black'
-      opponent = 2; // ->'white'
-    }
-    if (boardModel.canPutAll() == true) {
-      // 置ける石がある
-      if (player === 1) {
-        alert("白はパスされました。");
-      } else {
-        alert("黒はパスされました。");
-      }
-      passAuto = true;
-      controller.renderBoard();
-    } else {
-      passAuto = true;
-      document.getElementById("result").innerHTML =
-        '<input type="button" id="result-button" value="結果を表示">';
-      document
-        .getElementById("result")
-        .addEventListener("click", result, false);
-      result();
-    }
-  }
-};
 
 // 結果を表示
 const result = () => {
