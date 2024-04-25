@@ -17,6 +17,7 @@ export let player = 1; // ->'black'
 let opponent = 2; // ->'white'
 // CPU対戦時のパス判定に使用
 let passAuto;
+
 // 盤面の初期設定
 export let boardArray = [
   [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
@@ -30,23 +31,134 @@ export let boardArray = [
   [-1, 0, 0, 0, 0, 0, 0, 0, 0, -1],
   [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
 ];
-// 方向判定
-let direction = [
-  [-1, -1],
-  [-1, 0],
-  [-1, 1],
-  [0, -1],
-  [0, 0],
-  [0, 1],
-  [1, -1],
-  [1, 0],
-  [1, 1],
-];
-/* direction = [[左上],[左],[左下],[上],[原点],[下],[右上],[右],[右下]]; */
+
+// Model: BoardModel
+class BoardModel {
+  constructor() {
+    // 方向判定
+    this.direction = [
+      [-1, -1],
+      [-1, 0],
+      [-1, 1],
+      [0, -1],
+      [0, 0],
+      [0, 1],
+      [1, -1],
+      [1, 0],
+      [1, 1],
+    ];
+    /* direction = [[左上],[左],[左下],[上],[原点],[下],[右上],[右],[右下]]; */
+  }
+
+  // その場所が置ける場所か、またひっくり返す方向を判定する関数
+  // 引数(numberX, numberY) -> (X位置(1~8), Y位置(1~8))
+  canPut(numberX, numberY) {
+    // 上下左右が置ける位置か判定
+    let result = [];
+    /* 
+        result(出力例) = [false,true,false,false,false,false,false,false,false]; (->この場合、左側に置ける)
+        result(方向) = [[左上],[左],[左下],[上],[原点],[下],[右上],[右],[右下]];
+    */
+    // let allOver 0ならどこも置けない、1ならどこか置ける。result[9]から取得
+    let allOver = 0;
+    for (let i = 0; i <= 8; i++) {
+      if (
+        boardArray[numberX + this.direction[i][0]][
+          numberY + this.direction[i][1]
+        ] === opponent &&
+        boardArray[numberX][numberY] === 0
+      ) {
+        // 上下左右に[相手の色](白(==2))がある場合 && そこが空いている(==0)マスか
+        // 現在の8つの方向を記録
+        let c = this.direction[i][0];
+        let d = this.direction[i][1];
+        // とりあえずfalse
+        let TorF = false;
+
+        // 置いた先に自分の色があるか探索する処理
+        while (true) {
+          // もし、先に黒があり、置けるのであればtrue
+          if (boardArray[numberX + c][numberY + d] === player) {
+            TorF = true;
+            allOver = 1;
+            break;
+          }
+          // 壁・緑に当たったら終了
+          if (
+            boardArray[numberX + c][numberY + d] === -1 ||
+            boardArray[numberX + c][numberY + d] === 0
+          ) {
+            break;
+          }
+          c += this.direction[i][0];
+          d += this.direction[i][1];
+        }
+        result.push(TorF);
+      } else {
+        result.push(false);
+      }
+    }
+    result.push(allOver);
+    // 結果を返却
+    return result;
+  }
+
+  // ひっくり返す処理
+  reverse(numberX, numberY) {
+    // 判定プログラムから結果呼び出し
+    let result = this.canPut(numberX, numberY);
+
+    for (let i = 0; i <= 8; i++) {
+      if (result[i] == true) {
+        let c = this.direction[i][0];
+        let d = this.direction[i][1];
+        while (true) {
+          boardArray[numberX + c][numberY + d] = player;
+          // 一個先に黒があったらbreak
+          if (
+            boardArray[numberX + this.direction[i][0] + c][
+              numberY + this.direction[i][1] + d
+            ] === player
+          ) {
+            break;
+          }
+          c += this.direction[i][0];
+          d += this.direction[i][1];
+        }
+      }
+    }
+    if (result[9] === 1) {
+      // 自分のクリックしたところも反転
+      boardArray[numberX][numberY] = player;
+    }
+  }
+}
+
+// Controller
+class Controller {
+  constructor(model) {
+    this.model = model;
+    this.view = new BoardView(this);
+  }
+
+  // ボタンクリックイベントを処理するメソッド
+  handleButtonClick() {
+    // ここでモデルのデータを更新するなどの処理を行う
+    // view更新
+    // this.view.render(model.getData());
+  }
+
+  renderBoard() {
+    this.view.renderBoard();
+  }
+}
+
+// MVCの初期化
+// 盤面MODEL生成
+const boardModel = new BoardModel();
+const controller = new Controller(boardModel);
 
 const canvas = document.getElementById("canvas");
-// 盤面VIEW生成
-const boardView = new BoardView();
 
 // クリック取得
 canvas.addEventListener(
@@ -63,9 +175,21 @@ canvas.addEventListener(
     let numberX = Math.floor(y / CELLSIZE + 1);
     let numberY = Math.floor(x / CELLSIZE + 1);
 
-    let result = canPut(numberX, numberY);
+    let result = boardModel.canPut(numberX, numberY);
     if (result[9] === 1) {
-      reverse(numberX, numberY);
+      boardModel.reverse(numberX, numberY);
+
+      // プレイヤーの反転
+      if (player === 1) {
+        player = 2; // ->'white'
+        opponent = 1; // ->'black'
+      } else {
+        player = 1; // ->'black'
+        opponent = 2; // ->'white'
+      }
+      controller.renderBoard();
+      judgePass();
+
       if (playMode === 1 && passAuto == false) {
         setTimeout(opponentAuto, 300);
       }
@@ -74,109 +198,28 @@ canvas.addEventListener(
   false
 );
 
-// その場所が置ける場所か、またひっくり返す方向を判定する関数
-// 引数(numberX, numberY) -> (X位置(1~8), Y位置(1~8))
-const canPut = (numberX, numberY) => {
-  // 上下左右が置ける位置か判定
-  let result = [];
-  /* 
-        result(出力例) = [false,true,false,false,false,false,false,false,false]; (->この場合、左側に置ける)
-        result(方向) = [[左上],[左],[左下],[上],[原点],[下],[右上],[右],[右下]];
-    */
-  // let allOver 0ならどこも置けない、1ならどこか置ける。result[9]から取得
-  let allOver = 0;
-  for (let i = 0; i <= 8; i++) {
-    if (
-      boardArray[numberX + direction[i][0]][numberY + direction[i][1]] ===
-        opponent &&
-      boardArray[numberX][numberY] === 0
-    ) {
-      // 上下左右に[相手の色](白(==2))がある場合 && そこが空いている(==0)マスか
-      // 現在の8つの方向を記録
-      let c = direction[i][0];
-      let d = direction[i][1];
-      // とりあえずfalse
-      let TorF = false;
-
-      // 置いた先に自分の色があるか探索する処理
-      while (true) {
-        // もし、先に黒があり、置けるのであればtrue
-        if (boardArray[numberX + c][numberY + d] === player) {
-          TorF = true;
-          allOver = 1;
-          break;
-        }
-        // 壁・緑に当たったら終了
-        if (
-          boardArray[numberX + c][numberY + d] === -1 ||
-          boardArray[numberX + c][numberY + d] === 0
-        ) {
-          break;
-        }
-        c += direction[i][0];
-        d += direction[i][1];
-      }
-      result.push(TorF);
-    } else {
-      result.push(false);
-    }
-  }
-  result.push(allOver);
-  // 結果を返却
-  return result;
-};
-
 // 対戦CPUの関数（ランダムで置いているだけなのでとても弱い）
 const opponentAuto = () => {
   while (true) {
     let a = Math.floor(Math.random() * (8 + 1 - 1)) + 1;
     let b = Math.floor(Math.random() * (8 + 1 - 1)) + 1;
-    let result = canPut(a, b);
+    let result = boardModel.canPut(a, b);
     if (result[9] === 1) {
-      reverse(a, b);
+      boardModel.reverse(a, b);
+
+      // プレイヤーの反転
+      if (player === 1) {
+        player = 2; // ->'white'
+        opponent = 1; // ->'black'
+      } else {
+        player = 1; // ->'black'
+        opponent = 2; // ->'white'
+      }
+      controller.renderBoard();
+      judgePass();
+
       break;
     }
-  }
-};
-
-// ひっくり返す処理
-const reverse = (numberX, numberY) => {
-  // 判定プログラムから結果呼び出し
-  let result = canPut(numberX, numberY);
-
-  for (let i = 0; i <= 8; i++) {
-    if (result[i] == true) {
-      let c = direction[i][0];
-      let d = direction[i][1];
-      while (true) {
-        boardArray[numberX + c][numberY + d] = player;
-        // 一個先に黒があったらbreak
-        if (
-          boardArray[numberX + direction[i][0] + c][
-            numberY + direction[i][1] + d
-          ] === player
-        ) {
-          break;
-        }
-        c += direction[i][0];
-        d += direction[i][1];
-      }
-    }
-  }
-  if (result[9] === 1) {
-    // 自分のクリックしたところも反転
-    boardArray[numberX][numberY] = player;
-
-    // プレイヤーの反転
-    if (player === 1) {
-      player = 2; // ->'white'
-      opponent = 1; // ->'black'
-    } else {
-      player = 1; // ->'black'
-      opponent = 2; // ->'white'
-    }
-    boardView.renderBoard();
-    judgePass();
   }
 };
 
@@ -186,7 +229,7 @@ const canPutAll = () => {
   for (let x = 1; x <= 8; x++) {
     for (let y = 1; y <= 8; y++) {
       // 置ける場所を判定
-      let result = canPut(x, y);
+      let result = boardModel.canPut(x, y);
 
       if (result[9] === 1) {
         // 置ける石がある
@@ -226,7 +269,7 @@ const judgePass = () => {
         alert("黒はパスされました。");
       }
       passAuto = true;
-      boardView.renderBoard();
+      controller.renderBoard();
     } else {
       passAuto = true;
       document.getElementById("result").innerHTML =
@@ -265,6 +308,6 @@ const result = () => {
 // https://takayamato.com/eventlistener/
 
 // 盤面を描写
-// window.addEventListener("load", boardView.renderBoard, false);
+// window.addEventListener("load", controller.renderBoard, false);
 // イベントリスナの向こう側でオブジェクトのプロパティを参照するには、一度アロー関数をかませるとできるようになる。
-window.addEventListener("load", (e) => boardView.renderBoard(e), false);
+window.addEventListener("load", (e) => controller.renderBoard(e), false);
