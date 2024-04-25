@@ -24,7 +24,9 @@ export class BoardView {
   ctx;
   nowPlayerElement;
 
-  constructor() {
+  constructor(controller) {
+    this.controller = controller;
+
     // キャンバス準備
     this.canvas = document.getElementById("canvas");
     this.ctx = this.canvas.getContext("2d");
@@ -50,7 +52,25 @@ export class BoardView {
       false
     );
 
+    // クリック取得
+    this.canvas.addEventListener(
+      "click",
+      (e) => this.handleMouseDown(e),
+      false
+    );
+
     this.resetButton.addEventListener("click", moveTop, false);
+  }
+
+  handleMouseDown(e) {
+    /* https://tech-blog.s-yoshiki.com/entry/90 (参考) */
+    // クリック地点の座標を取得
+    let rect = e.target.getBoundingClientRect();
+    let x = e.clientX - rect.left;
+    let y = e.clientY - rect.top;
+    /* ここまで */
+
+    this.controller.handleInput(x, y);
   }
 
   // constructor(boardModel) {

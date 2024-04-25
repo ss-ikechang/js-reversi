@@ -148,28 +148,11 @@ class Controller {
     // this.view.render(model.getData());
   }
 
-  renderBoard() {
-    this.view.renderBoard();
-  }
-}
-
-// MVCの初期化
-// 盤面MODEL生成
-const boardModel = new BoardModel();
-const controller = new Controller(boardModel);
-
-const canvas = document.getElementById("canvas");
-
-// クリック取得
-canvas.addEventListener(
-  "click",
-  (event) => {
-    /* https://tech-blog.s-yoshiki.com/entry/90 (参考) */
-    // クリック地点の座標を取得
-    let rect = event.target.getBoundingClientRect();
-    let x = event.clientX - rect.left;
-    let y = event.clientY - rect.top;
-    /* ここまで */
+  handleInput(x, y) {
+    // ユーザーの入力を処理し、必要な操作を行う処理を実装
+    // this.boardModel.placePiece(x, y, currentPlayer.color);
+    // 他の必要な処理を実行
+    // this.boardView.renderBoard(); // ボードの状態が変更されたので再描画
 
     // クリックされた四角の配列上での位置を取得する（正方形の一辺は50なので、座標を50で割り、1を足す）
     let numberX = Math.floor(y / CELLSIZE + 1);
@@ -187,16 +170,24 @@ canvas.addEventListener(
         player = 1; // ->'black'
         opponent = 2; // ->'white'
       }
-      controller.renderBoard();
+      this.view.renderBoard();
       judgePass();
 
       if (playMode === 1 && passAuto == false) {
         setTimeout(opponentAuto, 300);
       }
     }
-  },
-  false
-);
+  }
+
+  renderBoard() {
+    this.view.renderBoard();
+  }
+}
+
+// MVCの初期化
+// 盤面MODEL生成
+const boardModel = new BoardModel();
+const controller = new Controller(boardModel);
 
 // 対戦CPUの関数（ランダムで置いているだけなのでとても弱い）
 const opponentAuto = () => {
