@@ -141,20 +141,8 @@ class Controller {
     this.view = new BoardView(this);
   }
 
-  // ボタンクリックイベントを処理するメソッド
-  handleButtonClick() {
-    // ここでモデルのデータを更新するなどの処理を行う
-    // view更新
-    // this.view.render(model.getData());
-  }
-
   // 盤のセル位置を受け取り、必要な操作を行う
   handleInput(numberX, numberY) {
-    // ユーザーの入力を処理し、必要な操作を行う処理を実装
-    // this.boardModel.placePiece(x, y, currentPlayer.color);
-    // 他の必要な処理を実行
-    // this.boardView.renderBoard(); // ボードの状態が変更されたので再描画
-
     let result = boardModel.canPut(numberX, numberY);
     if (result[9] === 1) {
       boardModel.reverse(numberX, numberY);
@@ -171,13 +159,40 @@ class Controller {
       judgePass();
 
       if (playMode === 1 && passAuto == false) {
-        setTimeout(opponentAuto, 300);
+        // イベントリスナの向こう側でオブジェクトのプロパティを参照するには、一度アロー関数をかませるとできるようになる。
+        setTimeout(() => this.opponentAuto(), 300);
       }
     }
   }
 
+  // 盤の状態が変更されたので再描画
   renderBoard() {
     this.view.renderBoard();
+  }
+
+  // 対戦CPUの関数（ランダムで置いているだけなのでとても弱い）
+  opponentAuto() {
+    while (true) {
+      let a = Math.floor(Math.random() * (8 + 1 - 1)) + 1;
+      let b = Math.floor(Math.random() * (8 + 1 - 1)) + 1;
+      let result = boardModel.canPut(a, b);
+      if (result[9] === 1) {
+        boardModel.reverse(a, b);
+
+        // プレイヤーの反転
+        if (player === 1) {
+          player = 2; // ->'white'
+          opponent = 1; // ->'black'
+        } else {
+          player = 1; // ->'black'
+          opponent = 2; // ->'white'
+        }
+        this.renderBoard();
+        judgePass();
+
+        break;
+      }
+    }
   }
 }
 
@@ -185,31 +200,6 @@ class Controller {
 // 盤面MODEL生成
 const boardModel = new BoardModel();
 const controller = new Controller(boardModel);
-
-// 対戦CPUの関数（ランダムで置いているだけなのでとても弱い）
-const opponentAuto = () => {
-  while (true) {
-    let a = Math.floor(Math.random() * (8 + 1 - 1)) + 1;
-    let b = Math.floor(Math.random() * (8 + 1 - 1)) + 1;
-    let result = boardModel.canPut(a, b);
-    if (result[9] === 1) {
-      boardModel.reverse(a, b);
-
-      // プレイヤーの反転
-      if (player === 1) {
-        player = 2; // ->'white'
-        opponent = 1; // ->'black'
-      } else {
-        player = 1; // ->'black'
-        opponent = 2; // ->'white'
-      }
-      controller.renderBoard();
-      judgePass();
-
-      break;
-    }
-  }
-};
 
 // 全体に置ける場所があるか判定する関数
 const canPutAll = () => {

@@ -77,10 +77,6 @@ export class BoardView {
     this.controller.handleInput(numberX, numberY);
   }
 
-  // constructor(boardModel) {
-  //   this.boardModel = boardModel;
-  // }
-  // Methods to render the board
   // 盤面を描写する関数
   renderBoard() {
     // 上部のプレイヤー名書き換え;
@@ -161,12 +157,6 @@ export class BoardView {
     imageBase64 = this.canvas.toDataURL("image/png");
   }
 
-  // Methods to handle user input
-  handleUserInput(x, y) {
-    // Code for handling user input goes here
-  }
-
-  // Methods to handle user input
   handleMouseOver(e) {
     // this.nowPlayerElement.innerHTML = "handleMouseOver";
     /* https://tech-blog.s-yoshiki.com/entry/90 (参考。先ほどと同様のものです) */
