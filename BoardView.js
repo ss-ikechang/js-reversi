@@ -65,12 +65,16 @@ export class BoardView {
   handleMouseDown(e) {
     /* https://tech-blog.s-yoshiki.com/entry/90 (参考) */
     // クリック地点の座標を取得
-    let rect = e.target.getBoundingClientRect();
-    let x = e.clientX - rect.left;
-    let y = e.clientY - rect.top;
+    const rect = e.target.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
     /* ここまで */
 
-    this.controller.handleInput(x, y);
+    // クリックされた四角の配列上での位置を取得する（正方形の一辺は50なので、座標を50で割り、1を足す）
+    const numberX = Math.floor(y / CELLSIZE + 1);
+    const numberY = Math.floor(x / CELLSIZE + 1);
+
+    this.controller.handleInput(numberX, numberY);
   }
 
   // constructor(boardModel) {

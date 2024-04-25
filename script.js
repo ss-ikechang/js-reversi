@@ -148,15 +148,12 @@ class Controller {
     // this.view.render(model.getData());
   }
 
-  handleInput(x, y) {
+  // 盤のセル位置を受け取り、必要な操作を行う
+  handleInput(numberX, numberY) {
     // ユーザーの入力を処理し、必要な操作を行う処理を実装
     // this.boardModel.placePiece(x, y, currentPlayer.color);
     // 他の必要な処理を実行
     // this.boardView.renderBoard(); // ボードの状態が変更されたので再描画
-
-    // クリックされた四角の配列上での位置を取得する（正方形の一辺は50なので、座標を50で割り、1を足す）
-    let numberX = Math.floor(y / CELLSIZE + 1);
-    let numberY = Math.floor(x / CELLSIZE + 1);
 
     let result = boardModel.canPut(numberX, numberY);
     if (result[9] === 1) {
