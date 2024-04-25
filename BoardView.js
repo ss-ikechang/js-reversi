@@ -1,4 +1,4 @@
-import { player, yourName, partnerName } from "./script.js";
+import { yourName, partnerName, player } from "./Controller.js";
 
 const GAMESIZE = 300;
 const CELLSIZE = GAMESIZE / 8;
