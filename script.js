@@ -172,6 +172,7 @@ class Controller {
 
   // 盤のセル位置を受け取り、必要な操作を行う
   handleInput(numberX, numberY) {
+    // ユーザーの入力を処理し、必要な操作を行う処理を実装
     let result = boardModel.canPut(numberX, numberY);
     if (result[9] === 1) {
       boardModel.reverse(numberX, numberY);
@@ -184,7 +185,11 @@ class Controller {
         player = 1; // ->'black'
         opponent = 2; // ->'white'
       }
+
+      // 再描画（viewに対し操作する）
       this.renderBoard();
+
+      //
       judgePass();
 
       if (playMode === 1 && passAuto == false) {
@@ -197,6 +202,18 @@ class Controller {
   // 盤の状態が変更されたので再描画
   renderBoard() {
     this.view.renderBoard(this.model.board());
+  }
+
+  startGame() {
+    // Code for starting the game goes here
+  }
+
+  switchPlayer() {
+    // プレイヤーの交代処理を実装
+  }
+
+  checkForWinner() {
+    // 勝者のチェックを行う処理を実装
   }
 
   // 対戦CPUの関数（ランダムで置いているだけなのでとても弱い）
