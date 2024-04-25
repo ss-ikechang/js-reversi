@@ -19,7 +19,7 @@ let opponent = 2; // ->'white'
 let passAuto;
 
 // 盤面の初期設定
-export let boardArray = [
+let boardArray = [
   [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
   [-1, 0, 0, 0, 0, 0, 0, 0, 0, -1],
   [-1, 0, 0, 0, 0, 0, 0, 0, 0, -1],
@@ -48,6 +48,11 @@ class BoardModel {
       [1, 1],
     ];
     /* direction = [[左上],[左],[左下],[上],[原点],[下],[右上],[右],[右下]]; */
+  }
+
+  // 盤の配列を返却
+  board() {
+    return boardArray;
   }
 
   // その場所が置ける場所か、またひっくり返す方向を判定する関数
@@ -155,7 +160,7 @@ class Controller {
         player = 1; // ->'black'
         opponent = 2; // ->'white'
       }
-      this.view.renderBoard();
+      this.renderBoard();
       judgePass();
 
       if (playMode === 1 && passAuto == false) {
@@ -167,7 +172,7 @@ class Controller {
 
   // 盤の状態が変更されたので再描画
   renderBoard() {
-    this.view.renderBoard();
+    this.view.renderBoard(this.model.board());
   }
 
   // 対戦CPUの関数（ランダムで置いているだけなのでとても弱い）

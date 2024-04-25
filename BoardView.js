@@ -1,4 +1,4 @@
-import { player, yourName, partnerName, boardArray } from "./script.js";
+import { player, yourName, partnerName } from "./script.js";
 
 const GAMESIZE = 300;
 const CELLSIZE = GAMESIZE / 8;
@@ -78,7 +78,7 @@ export class BoardView {
   }
 
   // 盤面を描写する関数
-  renderBoard() {
+  renderBoard(boardArray) {
     // 上部のプレイヤー名書き換え;
     if (player === 1) {
       this.nowPlayerElement.innerHTML = "黒" + yourName;
