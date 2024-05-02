@@ -1,14 +1,18 @@
 # js-reversi
+
 JavaScriptで製作したリバーシ
 
-## デモ  
+## デモ
+
 リバーシ  
 https://ss-ikechang.github.io/js-reversi/
 
 ## fork元オリジナルデモ
+
 https://kimoty.net/reversi/
 
 ## 得られた知見
+
 ```
 // canvasの周りの枠を追加
 // classListとは
@@ -23,9 +27,16 @@ https://kimoty.net/reversi/
 // }
 document.getElementById("canvas").classList.add("canvas");
 ```
+
 ```
 // 【JS】 DOMContentLoaded と load の違いを新人でもわかるように解説
 // https://takayamato.com/eventlistener/
 // 盤面を描写
 window.addEventListener('load', draw, false);
 ```
+
+npm startでWEBサーバを起動させる最小限のこと
+https://zenn.dev/okunokentaro/articles/01ejkz0014w0bg9cx3q94rfy0b
+
+npmのローカルインストールとグローバルインストールの違い | GK Front-end Blog
+https://gk-fe.com/article/npm-local-global-installation-differences/
