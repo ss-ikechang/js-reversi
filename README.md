@@ -40,3 +40,14 @@ https://zenn.dev/okunokentaro/articles/01ejkz0014w0bg9cx3q94rfy0b
 
 npmのローカルインストールとグローバルインストールの違い | GK Front-end Blog
 https://gk-fe.com/article/npm-local-global-installation-differences/
+
+## リバーシ評価関数
+
+minimax法によるリバーシの最善手の探索
+https://www.ipsj.or.jp/event/taikai/82/82PosterSession/img/portfolio/82P_1062.pdf
+
+リバーシの評価関数について 塩田 好 - 情報学部
+https://www.info.kindai.ac.jp/~takasi-i/thesis/2012_09-1-037-0133_S_Shiota_thesis.pdf
+
+大学の課題でαβ法を使ったオセロAIを作れなかった話 #アルゴリズム - Qiita
+https://qiita.com/reika727/items/b027f4c20e2c946ea102
