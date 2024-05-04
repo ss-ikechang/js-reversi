@@ -97,6 +97,18 @@ export class Controller {
 
   // 対戦CPUの関数（ランダムで置いているだけなのでとても弱い）
   opponentAuto() {
+    // テストコード
+    const opponentValue = this.model.pieceValue(4, 4, 2); // 2  = 白
+    // this.view.messageDialog(opponentValue);
+
+    if (opponentValue === 1) {
+      this.view.messageDialog("4 * 4 は白：PCです");
+    } else if (opponentValue === -1) {
+      this.view.messageDialog("4 * 4 は黒：人間です");
+    } else {
+      this.view.messageDialog("4 * 4 は空きです");
+    }
+
     while (true) {
       // ランダムにセルを選択
       let a = Math.floor(Math.random() * (8 + 1 - 1)) + 1;

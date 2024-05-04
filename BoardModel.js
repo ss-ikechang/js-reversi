@@ -36,6 +36,21 @@ export class BoardModel {
     return boardArray;
   }
 
+  // 指定された場所のコマの色がmyColorの色なら「1」
+  // 相手側の色なら「-1」
+  // コマなしなら「0」
+  pieceValue(numberX, numberY, myColor) {
+    const colorValue = boardArray[numberX][numberY];
+
+    if (colorValue === 0) {
+      return 0;
+    } else if (colorValue === myColor) {
+      return 1;
+    } else {
+      return -1;
+    }
+  }
+
   // その場所が置ける場所か、またひっくり返す方向を判定する関数
   // 引数(numberX, numberY) -> (X位置(1~8), Y位置(1~8))
   canPut(numberX, numberY) {
