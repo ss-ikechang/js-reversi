@@ -181,5 +181,21 @@ export class BoardModel {
       boardArray[numberX][numberY] = player;
     }
   }
+
+  // コンピューター側リバーシ操作座標決定。
+  playBestHand() {
+    // テストコード
+    // const valueBoard = this.model.valueBoard();
+    // this.view.messageDialog(valueBoard);
+
+    let a = Math.floor(Math.random() * (8 + 1 - 1)) + 1; // a = 1～8
+    let b = Math.floor(Math.random() * (8 + 1 - 1)) + 1; // b = 1～8
+
+    let position = {
+      a: a,
+      b: b,
+    };
+
+    return position;
+  }
 }
-// 盤面の初期設定

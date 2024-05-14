@@ -97,14 +97,12 @@ export class Controller {
 
   // 対戦CPUの関数（ランダムで置いているだけなのでとても弱い）
   opponentAuto() {
-    // テストコード
-    const valueBoard = this.model.valueBoard();
-    this.view.messageDialog(valueBoard);
-
     while (true) {
-      // ランダムにセルを選択
-      let a = Math.floor(Math.random() * (8 + 1 - 1)) + 1;
-      let b = Math.floor(Math.random() * (8 + 1 - 1)) + 1;
+      // ランダムにセルを選択→model内のメソッド呼び出し
+      const position = this.model.playBestHand();
+
+      const a = position.a;
+      const b = position.b;
 
       // 盤の操作（modelに対し操作する）
       let result = this.model.canPut(a, b);
